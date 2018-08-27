@@ -1,8 +1,8 @@
 #create server
 pip install Django==1.9
-django-admin startproject aafirstsite
+django-admin startproject firstDjango
 python manage.py runserver
 http://127.0.0.1:8000/
 
 #create APP
-python manage.py startapp ankur1
+python manage.py startapp app1
