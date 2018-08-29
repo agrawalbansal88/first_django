@@ -2,11 +2,10 @@
 <html lang="en">
 
 <head>
-    <title>Ankur Agrawal</title>
+    <title>Harrison Kinsley</title>
     <meta charset="utf-8" />
-    <!--{% load staticfiles %}-->
-    <!--<link rel="stylesheet" href="{% static 'personal/css/bootstrap.min.css' %}" type = "text/css"/>-->
-    <link rel="stylesheet" href='personal/css/bootstrap.min.css' type = "text/css"/>
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'personal/css/bootstrap.min.css' %}" type = "text/css"/>
     <meta name="viewport" content = "width=device-width, initial-scale=1.0">
     
     <style type="text/css">
@@ -23,13 +22,13 @@
               <div class="col-sm-2">
                   <br>
                   <center>
-                    <img src="{% static 'personal/img/profile.jpg' %}" class="responsive-img" style='max-height:100px;' alt="face">
+                    <img src="{% static 'personal/img/profile.jpg' %}" class="img-responsive" style='max-height:100px;' alt="face">
                   </center>
               </div>
               <div class="col-sm-10">
                   <br>
                   <center>
-                  <h3>Django Project</h3>
+                  <h3>Programming, Teaching, Entrepreneurship</h3>
                   </center>
               </div>
         </div><hr>
@@ -68,19 +67,3 @@
 </body>
 
 </html>
-Okay, so that's quite the change from before! Let's break it down a bit:
-
-<head>
-    <title>Harrison Kinsley</title>
-    <meta charset="utf-8" />
-    {% load staticfiles %}
-    <link rel="stylesheet" href="{% static 'personal/css/bootstrap.min.css' %}" type = "text/css"/>
-    <meta name="viewport" content = "width=device-width, initial-scale=1.0">
-    
-    <style type="text/css">
-        html,
-        body {
-          height:100%
-        }
-    </style>
-</head>
