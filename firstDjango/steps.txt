@@ -6,3 +6,10 @@ http://127.0.0.1:8000/
 
 #create APP
 python manage.py startapp app1
+
+https://pythonprogramming.net/database-migration-django-python-tutorial/
+python manage.py makemigrations
+python manage.py makemigrations blog
+python manage.py sqlmigrate blog 0001
+
+
