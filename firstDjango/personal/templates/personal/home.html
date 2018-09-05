@@ -13,5 +13,6 @@
   <input type="file" name="zerodha_file" id="zerodha_file">
   <input type="submit", value="Upload zerodha account statement">
 </form>
+{{ parse_result |safe }}
 {{ data_df|safe }}
 {% endblock %}   
