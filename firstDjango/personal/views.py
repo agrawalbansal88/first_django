@@ -20,8 +20,31 @@ def index(request):
     else:
         return render(request, 'personal/home.html')
 
+
+
+
+
 def contact(request):
-    return render(request, 'personal/basic.html', {'content':['I am a good boy', 'am I?']})
+    trade_objs = TradeModel.objects.all()
+    if request.method == "POST":
+        selected_stock= request.POST.get('selected_stock')
+        selected_trades = [trade_obj.__dict__ for trade_obj in trade_objs if trade_obj.tradingsymbol==selected_stock]
+        tradingsymbols = set([trade_obj.tradingsymbol for trade_obj in trade_objs])
+
+        current_count = 0
+        current_avg_price = 0
+        #import pdb;pdb.set_trace()
+        return render(request, 'personal/show_trades.html', {'selected_trades': selected_trades,
+                                                             'tradingsymbol':selected_stock,
+                                                             'tradingsymbols':tradingsymbols})
+    else:
+        trade_objs = TradeModel.objects.all()
+        tradingsymbols = set([trade_obj.tradingsymbol for trade_obj in trade_objs])
+        return render(request, 'personal/show_trades.html', {'tradingsymbols':tradingsymbols})
+
+
+
+
 
 def process_data_df(data_df):
     TradeModel.objects.all().delete()
