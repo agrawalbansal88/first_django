@@ -31,7 +31,7 @@ def contact(request):
         return render(request, 'personal/show_trades.html', response)
     else:
         trade_objs = TradeModel.objects.all()
-        tradingsymbols = set([trade_obj.tradingsymbol for trade_obj in trade_objs])
+        tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
         return render(request, 'personal/show_trades.html', {'tradingsymbols':tradingsymbols})
 
 
@@ -39,22 +39,27 @@ def contact(request):
 def create_trade_specfic_response(selected_stock):
     trade_objs = TradeModel.objects.all()
     selected_trades = [trade_obj.__dict__ for trade_obj in trade_objs if trade_obj.tradingsymbol == selected_stock]
-    tradingsymbols = set([trade_obj.tradingsymbol for trade_obj in trade_objs])
+    tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
 
-    current_count = 0
-    current_total_val = 0
-    current_avg_price = 0
+    new_trade_list = []
     for trade in selected_trades:
-        if trade['trade_type'] == "buy":
-            current_count += trade['quantity']
-            current_total_val += trade['quantity'] * trade['price']
-        else:
-            current_count -= trade['quantity']
-            current_total_val -= trade['quantity'] * trade['price']
+        for i in range(int(trade['quantity'])):
+            new_trade_list.append((trade['trade_type'], trade['price'], trade['order_execution_time']))
 
-    current_avg_price = current_total_val / current_count if current_count != 0 else 0.0
-    profit_booked = current_total_val * -1 if current_count == 0 else "NA"
-    current_total_val = current_total_val if current_count != 0 else 0.0
+    trade_vals=[]
+    profit_booked = 0
+    for (trade_type, price, _) in new_trade_list:
+        if trade_type == "buy":
+            trade_vals.append(price)
+        else:
+            if trade_vals == []:continue
+            buy_val = trade_vals.pop()
+            profit_booked += price - buy_val
+
+    current_count = len(trade_vals)
+    current_total_val = round(sum(trade_vals),2)
+    current_avg_price = round(current_total_val/current_count,2) if current_count != 0 else 0.0
+
     trade_dict = {  'selected_trades': selected_trades,
                     'tradingsymbol':selected_stock,
                     'tradingsymbols':tradingsymbols,
