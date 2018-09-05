@@ -1,13 +1,7 @@
 {% extends "personal/header.html" %}
 {% block content %}
-<p>HOME PAGE</p>
-{% include "personal/includes/htmlsnippt.html" %}
-<!--<form method="post"> {% csrf_token %}-->
-<!--<p><label for = "date">Date:</label><input type="text" name="date" /></p>-->
-<!--<p><label for = "price">Price:</label><input type="text" name="price" /></p>-->
-<!--<input type="submit" value="Try IT"/>-->
-<!--</form>-->
-<!--<form action="/action_page.php">-->
+<!--<p>HOME PAGE</p>-->
+<!--{% include "personal/includes/htmlsnippt.html" %}-->
 <form method="post" enctype="multipart/form-data"> {% csrf_token %}
   <!--<input type="file" name="zerodha_file" id="zerodha_file" accept="csv/*">-->
   <input type="file" name="zerodha_file" id="zerodha_file">

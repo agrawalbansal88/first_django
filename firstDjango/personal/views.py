@@ -79,3 +79,6 @@ def process_data_df(data_df):
                                quantity=quantity,
                                price=price)
         trade_obj.save()
+
+
+#KEY: 125NKNLM9FJ2XONC https://www.alphavantage.co/support/#api-key
