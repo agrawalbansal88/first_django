@@ -87,3 +87,6 @@ def process_data_df(data_df):
 
 
 #KEY: 125NKNLM9FJ2XONC https://www.alphavantage.co/support/#api-key
+#KEY: q9tVsdxDY9RUPMJafHbF https://www.quandl.com/
+#KEy: 125NKNLM9FJ2XONC https://www.alphavantage.co/support/#api-key
+#https://github.com/madhurrajn
