@@ -30,9 +30,11 @@ tr:nth-child(even) {
   <input type="submit" value="Select">
 </form>
 
-
 {% if selected_trades%}
 <h4>{{tradingsymbol}}</h4>
+{{ Ankur |safe }}
+<br>
+<br>
 <h5>Current Stocks = {{current_count}}</h5>
 <h5>Current Investment = {{current_total_val}}</h5>
 <h5>Current Avg Price = {{current_avg_price}}</h5>

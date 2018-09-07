@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from personal.models import TradeModel
 
 import pandas as pd
 from StringIO import StringIO
+import time
 
 EXPECTED_INPUT_PARAMS = ['client_id', 'trade_date', 'order_execution_time', 'exchange', 'tradingsymbol', 'trade_type', 'quantity', 'price', 'order_id', 'trade_id', 'series']
 
@@ -19,8 +20,6 @@ def index(request):
             return render(request, 'personal/home.html', {'parse_result':parse_result})
     else:
         return render(request, 'personal/home.html')
-
-
 
 
 def contact(request):
@@ -66,7 +65,8 @@ def create_trade_specfic_response(selected_stock):
                     'current_count': current_count,
                     'current_total_val': current_total_val,
                     'current_avg_price': current_avg_price,
-                    'profit_booked':profit_booked}
+                    'profit_booked':profit_booked,
+                    'Ankur': get_html(selected_trades, selected_stock)}
     return trade_dict
 
 
@@ -90,3 +90,32 @@ def process_data_df(data_df):
 #KEY: q9tVsdxDY9RUPMJafHbF https://www.quandl.com/
 #KEy: 125NKNLM9FJ2XONC https://www.alphavantage.co/support/#api-key
 #https://github.com/madhurrajn
+
+def get_html(selected_trades, selected_stock):
+    from nvd3 import lineWithFocusChart, scatterChart, lineChart
+    # chart = lineWithFocusChart(name='lineWithFocusChart', x_is_date=True, x_axis_format="%d %b %Y", height=400, width=1000)
+    chart = scatterChart(name='scatterChart', x_is_date=True, x_axis_format="%d %b %Y", height=400, width=1000)
+    xdata = [1491004800000]
+    ydata = [None]
+    ydata1 = [None]
+    for trade in selected_trades:
+        xdata.append(int(trade['order_execution_time'].strftime('%s')+"000"))
+        if trade['trade_type'] == "buy":
+            ydata.append(trade['price'])
+            ydata1.append(None)
+        else:
+            ydata.append(None)
+            ydata1.append(trade['price'])
+
+    xdata.append(int(round(time.time() * 1000)))
+    ydata.append(None)
+    ydata1.append(None)
+
+    extra_serie = {"tooltip": {"y_start": "", "y_end": " balls"},
+                   "date_format": "%d %b %Y"}
+    kwargs = {'size': '50'}
+    chart.add_serie(name="BUY", y=ydata, x=xdata, extra=extra_serie, **kwargs)
+    chart.add_serie(name="SELL", y=ydata1, x=xdata, extra=extra_serie, **kwargs)
+
+    chart.buildhtml()
+    return chart.htmlcontent
