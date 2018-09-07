@@ -1,0 +1,59 @@
+{% extends "personal/header.html" %}
+{% block content %}
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
+
+<form action="PageObjects" method="post" enctype="multipart/form-data"> {% csrf_token %}
+    Select Stock...
+<select id="selected_stock" name="selected_stock">
+    <option selected="selected" disabled>SELECT</option>
+    {% for c in tradingsymbols%}
+    <!--<p>{{ c }}</p>-->
+      <option value="{{c}}">{{c}}</option>
+    {% endfor%}
+</select>
+  <input type="submit" value="Select">
+</form>
+
+
+{% if selected_trades%}
+<h4>{{tradingsymbol}}</h4>
+<h5>Current Stocks = {{current_count}}</h5>
+<h5>Current Investment = {{current_total_val}}</h5>
+<h5>Current Avg Price = {{current_avg_price}}</h5>
+<h5>Profit Booked = {{profit_booked}}</h5>
+<table>
+  <tr>
+    <th>Trade Date</th>
+    <th>trade_type</th>
+    <th>quantity</th>
+    <th>price</th>
+  </tr>
+ {% for c in selected_trades%}
+  <tr>
+    <th>{{ c.order_execution_time }}</th>
+    <th>{{ c.trade_type }}</th>
+    <th>{{ c.quantity }}</th>
+    <th>{{ c.price }}</th>
+  </tr>
+    {% endfor%}
+</table>
+{% endif%}
+
+
+{% endblock %}
