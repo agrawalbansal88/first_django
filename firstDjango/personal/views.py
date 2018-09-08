@@ -14,27 +14,22 @@ def index(request):
         if list(data_df.columns.values) == EXPECTED_INPUT_PARAMS:
             process_data_df(data_df)
             parse_result = "<h4 style='color:MediumSeaGreen;'>Successfully Uploaded trade file...!!!</h4>"
-
-            trade_objs = TradeModel.objects.all()
-            tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
-            all_stock_data = []
-            for tradesymbol in tradingsymbols:
-                all_stock_data.append(get_analyzed_data(tradesymbol))
-
             return render(request, 'personal/home.html', {"data_df": data_df.to_html(),
                                                           'parse_result': parse_result,
-                                                          'all_stock_data':all_stock_data})
+                                                          'all_stock_data':all_trade_data()})
         else:
             parse_result = "<h4 style='color:Tomato;'>ERROR while processing trade file...!!!</h4>"
             return render(request, 'personal/home.html', {'parse_result':parse_result})
     else:
-        trade_objs = TradeModel.objects.all()
-        tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
-        all_stock_data = []
-        for tradesymbol in tradingsymbols:
-            all_stock_data.append(get_analyzed_data(tradesymbol))
+        return render(request, 'personal/home.html', {'all_stock_data':all_trade_data()})
 
-        return render(request, 'personal/home.html', {'all_stock_data':all_stock_data})
+def all_trade_data():
+    trade_objs = TradeModel.objects.all()
+    tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
+    all_stock_data = []
+    for tradesymbol in tradingsymbols:
+        all_stock_data.append(get_analyzed_data(tradesymbol))
+    return all_stock_data
 
 
 def contact(request):
