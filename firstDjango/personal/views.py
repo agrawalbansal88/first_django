@@ -14,12 +14,27 @@ def index(request):
         if list(data_df.columns.values) == EXPECTED_INPUT_PARAMS:
             process_data_df(data_df)
             parse_result = "<h4 style='color:MediumSeaGreen;'>Successfully Uploaded trade file...!!!</h4>"
-            return render(request, 'personal/home.html', {"data_df": data_df.to_html(), 'parse_result': parse_result})
+
+            trade_objs = TradeModel.objects.all()
+            tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
+            all_stock_data = []
+            for tradesymbol in tradingsymbols:
+                all_stock_data.append(get_analyzed_data(tradesymbol))
+
+            return render(request, 'personal/home.html', {"data_df": data_df.to_html(),
+                                                          'parse_result': parse_result,
+                                                          'all_stock_data':all_stock_data})
         else:
             parse_result = "<h4 style='color:Tomato;'>ERROR while processing trade file...!!!</h4>"
             return render(request, 'personal/home.html', {'parse_result':parse_result})
     else:
-        return render(request, 'personal/home.html')
+        trade_objs = TradeModel.objects.all()
+        tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
+        all_stock_data = []
+        for tradesymbol in tradingsymbols:
+            all_stock_data.append(get_analyzed_data(tradesymbol))
+
+        return render(request, 'personal/home.html', {'all_stock_data':all_stock_data})
 
 
 def contact(request):
@@ -36,8 +51,14 @@ def contact(request):
 
 
 def create_trade_specfic_response(selected_stock):
+    trade_dict = get_analyzed_data(selected_stock)
+    trade_dict['Ankur'] = get_html(selected_stock)
+    return trade_dict
+
+def get_analyzed_data(selected_stock):
     trade_objs = TradeModel.objects.all()
     selected_trades = [trade_obj.__dict__ for trade_obj in trade_objs if trade_obj.tradingsymbol == selected_stock]
+
     tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
 
     new_trade_list = []
@@ -65,10 +86,9 @@ def create_trade_specfic_response(selected_stock):
                     'current_count': current_count,
                     'current_total_val': current_total_val,
                     'current_avg_price': current_avg_price,
-                    'profit_booked':profit_booked,
-                    'Ankur': get_html(selected_trades, selected_stock)}
-    return trade_dict
+                    'profit_booked':profit_booked}
 
+    return trade_dict
 
 def process_data_df(data_df):
     TradeModel.objects.all().delete()
@@ -91,8 +111,11 @@ def process_data_df(data_df):
 #KEy: 125NKNLM9FJ2XONC https://www.alphavantage.co/support/#api-key
 #https://github.com/madhurrajn
 
-def get_html(selected_trades, selected_stock):
+def get_html(selected_stock):
     from nvd3 import lineWithFocusChart, scatterChart, lineChart
+    trade_objs = TradeModel.objects.all()
+    selected_trades = [trade_obj.__dict__ for trade_obj in trade_objs if trade_obj.tradingsymbol == selected_stock]
+
     # chart = lineWithFocusChart(name='lineWithFocusChart', x_is_date=True, x_axis_format="%d %b %Y", height=400, width=1000)
     chart = scatterChart(name='scatterChart', x_is_date=True, x_axis_format="%d %b %Y", height=400, width=1000)
     xdata = [1491004800000]

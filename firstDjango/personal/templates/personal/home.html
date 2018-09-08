@@ -6,6 +6,35 @@
   <input type="file" name="zerodha_file" id="zerodha_file">
   <input type="submit", value="Upload zerodha account statement">
 </form>
+<br>
+<br>
 {{ parse_result |safe }}
-{{ data_df|safe }}
-{% endblock %}   
+{% if all_stock_data %}
+<table class="table">
+  <thead class="thead-dark">
+  <tr>
+    <th scope="col">SYMBOL</th>
+    <th scope="col">Current stock</th>
+    <th scope="col">Current Avg</th>
+    <th scope="col">Invested value</th>
+    <th scope="col">Current value</th>
+    <th scope="col">Profit/Loss</th>
+    <th scope="col">Unrealised Booked</th>
+    <th scope="col">Realised Booked</th>
+  </tr>
+   </thead>
+{%  for stock_data in all_stock_data %}
+  <tr>
+    <th scope="row">{{ stock_data.tradingsymbol }}</th>
+    <th>{{ stock_data.current_count }}</th>
+    <th>{{ stock_data.current_avg_price}}</th>
+    <th>{{ stock_data.current_total_val}}</th>
+    <th>NA</th>
+    <th>NA</th>
+    <th>NA</th>
+    <th>{{ stock_data.profit_booked }}</th>
+  </tr>
+{% endfor %}
+</table>
+{% endif%}
+{% endblock %}
