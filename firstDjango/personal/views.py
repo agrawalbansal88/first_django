@@ -1,9 +1,17 @@
+from __future__ import print_function
 from django.shortcuts import render, render_to_response
 from personal.models import TradeModel
 
 import pandas as pd
 from StringIO import StringIO
 import time
+
+from googleapiclient.discovery import build
+from httplib2 import Http
+from oauth2client import file, client, tools
+
+# If modifying these scopes, delete the file token.json.
+SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
 
 EXPECTED_INPUT_PARAMS = ['client_id', 'trade_date', 'order_execution_time', 'exchange', 'tradingsymbol', 'trade_type', 'quantity', 'price', 'order_id', 'trade_id', 'series']
 
@@ -27,16 +35,20 @@ def all_trade_data():
     trade_objs = TradeModel.objects.all()
     tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
     all_stock_data = []
+    all_live_data = get_live_data()
+
     for tradesymbol in tradingsymbols:
-        all_stock_data.append(get_analyzed_data(tradesymbol))
+        all_stock_data.append(get_analyzed_data(tradesymbol, all_live_data))
     return all_stock_data
 
 
 def contact(request):
+
     trade_objs = TradeModel.objects.all()
     if request.method == "POST":
         selected_stock= request.POST.get('selected_stock')
-        response = create_trade_specfic_response(selected_stock)
+        all_live_data = get_live_data()
+        response = create_trade_specfic_response(selected_stock, all_live_data)
         return render(request, 'personal/show_trades.html', response)
     else:
         trade_objs = TradeModel.objects.all()
@@ -45,12 +57,12 @@ def contact(request):
 
 
 
-def create_trade_specfic_response(selected_stock):
-    trade_dict = get_analyzed_data(selected_stock)
+def create_trade_specfic_response(selected_stock, all_live_data):
+    trade_dict = get_analyzed_data(selected_stock, all_live_data)
     trade_dict['Ankur'] = get_html(selected_stock)
     return trade_dict
 
-def get_analyzed_data(selected_stock):
+def get_analyzed_data(selected_stock, all_live_data):
     trade_objs = TradeModel.objects.all()
     selected_trades = [trade_obj.__dict__ for trade_obj in trade_objs if trade_obj.tradingsymbol == selected_stock]
 
@@ -74,6 +86,13 @@ def get_analyzed_data(selected_stock):
     current_count = len(trade_vals)
     current_total_val = round(sum(trade_vals),2)
     current_avg_price = round(current_total_val/current_count,2) if current_count != 0 else 0.0
+    live_price =  float(all_live_data[selected_stock]) if selected_stock in all_live_data else 0
+    current_val = live_price*current_count
+    profit_loss = current_val - current_total_val
+    if profit_loss >=0:
+        profit_loss = "<h5 style='color:MediumSeaGreen;'>{}</h4>".format(profit_loss)
+    else:
+        profit_loss = "<h5 style='color:Tomato ;'>{}</h4>".format(profit_loss)
 
     trade_dict = {  'selected_trades': selected_trades,
                     'tradingsymbol':selected_stock,
@@ -81,7 +100,10 @@ def get_analyzed_data(selected_stock):
                     'current_count': current_count,
                     'current_total_val': current_total_val,
                     'current_avg_price': current_avg_price,
-                    'profit_booked':profit_booked}
+                    'profit_booked':profit_booked,
+                    'live_price':live_price,
+                    'current_val': current_val,
+                    'profit_loss':profit_loss}
 
     return trade_dict
 
@@ -137,3 +159,29 @@ def get_html(selected_stock):
 
     chart.buildhtml()
     return chart.htmlcontent
+
+def get_live_data():
+    #https://developers.google.com/sheets/api/quickstart/python
+    """Shows basic usage of the Sheets API.
+    Prints values from a sample spreadsheet.
+    """
+    store = file.Storage('/Users/ankuragr/token.json')
+    creds = store.get()
+    if not creds or creds.invalid:
+        flow = client.flow_from_clientsecrets('/Users/ankuragr/credentials.json', SCOPES)
+        creds = tools.run_flow(flow, store)
+    service = build('sheets', 'v4', http=creds.authorize(Http()))
+
+    # Call the Sheets API
+    #SPREADSHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
+    SPREADSHEET_ID = '1euQ8Rt2pssNSRoN7yXNhfDTYmfS4sL_nrz9nttS8cnE'
+    RANGE_NAME = 'BSE!A2:B'
+    result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID,
+                                                range=RANGE_NAME).execute()
+    values = result.get('values', [])
+
+    if not values:
+        print('No data found.')
+        return None
+    else:
+        return { row[0]:row[1]for row in values if row[1] != "#N/A"}
