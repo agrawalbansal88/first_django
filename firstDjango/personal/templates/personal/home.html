@@ -6,10 +6,17 @@
   <input type="file" name="zerodha_file" id="zerodha_file">
   <input type="submit", value="Upload zerodha account statement">
 </form>
+<h5>Or</h5>
+<form method="post" enctype="multipart/form-data"> {% csrf_token %}
+  <input type="submit", value="Sync from ZERODHA">
+</form>
+
 <br>
 <br>
 {{ parse_result |safe }}
 {% if all_stock_data %}
+
+
 <table class="table">
   <thead class="thead-dark">
   <tr>

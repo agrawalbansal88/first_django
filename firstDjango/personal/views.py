@@ -17,7 +17,10 @@ EXPECTED_INPUT_PARAMS = ['client_id', 'trade_date', 'order_execution_time', 'exc
 
 def index(request):
     if request.method == "POST":
-        paramFile = request.FILES['zerodha_file'].read()
+        if request.FILES:
+            paramFile = request.FILES['zerodha_file'].read()
+        else:
+            paramFile = get_tradebook_or_PnL_from_zerodha()
         data_df = pd.read_csv(StringIO(paramFile))
         if list(data_df.columns.values) == EXPECTED_INPUT_PARAMS:
             process_data_df(data_df)
@@ -35,7 +38,7 @@ def all_trade_data():
     trade_objs = TradeModel.objects.all()
     tradingsymbols = sorted(set([trade_obj.tradingsymbol for trade_obj in trade_objs]))
     all_stock_data = []
-    all_live_data = get_live_data()
+    all_live_data = {}#get_live_data()
 
     for tradesymbol in tradingsymbols:
         all_stock_data.append(get_analyzed_data(tradesymbol, all_live_data))
@@ -185,3 +188,28 @@ def get_live_data():
         return None
     else:
         return { row[0]:row[1]for row in values if row[1] != "#N/A"}
+
+
+def get_tradebook_or_PnL_from_zerodha():
+    import webbrowser
+    import os
+    import time
+
+    DOWNLOADED_FILE_PATH = "/Users/ankuragr/Downloads/YN1586_tradebook.csv"
+    RETRY_COUNT = 15
+    if os.path.exists(DOWNLOADED_FILE_PATH):
+        os.remove(DOWNLOADED_FILE_PATH)
+
+    chrome_path = 'open -a /Applications/Google\ Chrome.app %s'
+    url = 'https://console.zerodha.com/api/tradebook/?segment=EQ&tradingsymbol=&from=2017-04-01&to=2018-09-10&download=1'
+    val = webbrowser.get(chrome_path).open(url)
+    if val:
+        count = 0
+        while not os.path.exists(DOWNLOADED_FILE_PATH) and count < RETRY_COUNT:
+            time.sleep(1)
+            count += 1
+        if not os.path.exists(DOWNLOADED_FILE_PATH): return None
+        with open(DOWNLOADED_FILE_PATH, "rb") as f:
+            data = f.read()
+            return data
+    return None
